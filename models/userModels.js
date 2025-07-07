@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },
-    customId:{
+    customId: {
       type: String,
       unique: true,
       sparse: true,
@@ -25,19 +25,23 @@ const userSchema = new mongoose.Schema(
       unique: true,
       required: true,
       lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Invalid email format"], //  Regex
     },
     age: {
       type: Number,
       required: true,
+      min: [0, "Age cannot be negative"],
+      max: [120, "Unrealistic age entered"],
     },
     address: {
       type: String,
       required: true,
     },
     phone: {
-      type: Number,
+      type: String,
       unique: true,
       required: true,
+      match: [/^\d{10}$/, 'Phone number must be exactly 10 digits'],
     },
     password: {
       type: String,
