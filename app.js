@@ -3,17 +3,21 @@ const dotenv = require('dotenv')
 const User = require('./models/userModels');
 const connectDB = require('./dbconfig/dbconnectivity');
 const userRoutes = require('./routes/userRoutes');
+const errorHandler = require('../middlewares/errorHandler');
 
 
 dotenv.config();  
 connectDB();   
 
 const app = express();
-app.use(express.json())
+app.use(express.json());
+
+// ❗ Register errorHandler at last
 
 const port = process.env.PORT || 5000;
 
 app.use('/users', userRoutes);
+app.use(errorHandler);
 
 
 // app.post('/register', async (req, res) => {
