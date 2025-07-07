@@ -1,6 +1,5 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const User = require("./models/userModels");
 const connectDB = require("./dbconfig/dbconnectivity");
 const userRoutes = require("./routes/userRoutes");
 const errorHandler = require("./middlewares/errorHandler");
