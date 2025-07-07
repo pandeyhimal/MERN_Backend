@@ -1,4 +1,5 @@
-const errorhandler = (err, req, res, next) => {
+
+const errorHandler = (err, req, res, next) => {
   console.error(" Error:", err.stack); // Log in console
 
   let statusCode = err.statusCode || 500;
@@ -32,4 +33,4 @@ const errorhandler = (err, req, res, next) => {
   });
 };
 
-module.exports = {errorhandler};
+module.exports = errorHandler;
