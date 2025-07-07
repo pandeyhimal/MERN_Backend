@@ -1,7 +1,8 @@
 const User = require("../models/userModels");
 const getNextSequence = require("../utils/autoIncrement");
+const createCustomError = require("../utils/errorHelper");
 
-const registration = async (req, res) => {
+const registration = async (req, res, next) => {
   try {
     const { firstName, lastName, email, age, address, phone, password } =
       req.body;
@@ -31,26 +32,27 @@ const registration = async (req, res) => {
       email,
       phone,
       password,
+      userId,
+      customId,
     });
-    user.userId = userId;
-    user.customId = customId;
-    await user.save();
+    // user.userId = userId;
+    // user.customId = customId;
+    // await user.save();
     console.log(user);
     res.status(201).json({ message: "User created successfully", user });
   } catch (error) {
     console.error("Error inserting user:", error.message);
     //   res.status(500).json({ message: "Failed to insert user", error });
 
-    // Optional: Customize error message and status code
-    error.statusCode = 400; // or 500, based on the type of error
-    error.message = "Failed to insert user";
+    // Customize error message and status code
+    // const customError = new Error("Failed to insert user");
+    // customError.statusCode = 400;
 
-    // Pass it to the centralized error handler
-    next(error);
+    next(createCustomError("Failed to insert user", 500));
   }
 };
 
-const getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find();
     console.log(users);
@@ -59,13 +61,11 @@ const getAllUsers = async (req, res) => {
     console.error("Error fetching users:", error.message);
     // res.status(500).json({ message: "Failed to fetch users", error });
 
-    error.statusCode = 500;
-    error.message = "Failed to fetch users";
-    next(error);
+    next(createCustomError("Failed to fetch user", 500));
   }
 };
 
-const getUserById = async (req, res) => {
+const getUserById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const user = await User.findOne({ userId: id });
@@ -77,13 +77,11 @@ const getUserById = async (req, res) => {
     console.error("Error fetching user:", error.message);
     // res.status(500).json({ message: "Failed to fetch user", error });
 
-    error.statusCode = 500;
-    error.message = "Failed to fetch user";
-    next(error);
+    next(createCustomError("Failed to fetch user", 500));
   }
 };
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
     console.log(req.params.id);
@@ -102,13 +100,11 @@ const updateUser = async (req, res) => {
     console.error("Error updating user:", error.message);
     // res.status(500).json({ message: "Failed to update user", error });
 
-    error.statusCode = 500;
-    error.message = "Failed to update user";
-    next(error);
+    next(createCustomError("Failed to update user", 500));
   }
 };
 
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params;
     const user = await User.findOneAndDelete({ userId: id });
@@ -120,9 +116,7 @@ const deleteUser = async (req, res) => {
     console.error("Error deleting user:", error.message);
     // res.status(500).json({ message: "Failed to delete user", error });
 
-    error.statusCode = 500;
-    error.message = "Failed to delete user";
-    next(error);
+    next(createCustomError("Failed to delete user", 500));
   }
 };
 
