@@ -1,6 +1,7 @@
 const User = require("../models/userModels");
 const getNextSequence = require("../utils/autoIncrement");
 const createCustomError = require("../utils/errorHelper");
+const hashPassword = require("../utils/hashPassword");
 
 const registration = async (req, res, next) => {
   try {
@@ -24,6 +25,8 @@ const registration = async (req, res, next) => {
 
     const { userId, customId } = await getNextSequence("userId", "STC");
 
+    const hashedPassword = await hashPassword(password); // Use utils
+
     const user = await User.create({
       firstName,
       lastName,
@@ -31,7 +34,7 @@ const registration = async (req, res, next) => {
       address,
       email,
       phone,
-      password,
+      password: hashedPassword, // save hashed
       userId,
       customId,
     });
