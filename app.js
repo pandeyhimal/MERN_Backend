@@ -1,27 +1,23 @@
-const express = require('express')
-const dotenv = require('dotenv')
-const User = require('./models/userModels');
-const connectDB = require('./dbconfig/dbconnectivity');
-const userRoutes = require('./routes/userRoutes');
-const errorHandler = require('../middlewares/errorHandler');
+const express = require("express");
+const dotenv = require("dotenv");
+const User = require("./models/userModels");
+const connectDB = require("./dbconfig/dbconnectivity");
+const userRoutes = require("./routes/userRoutes");
+const errorHandler = require("./middlewares/errorHandler");
 
-
-dotenv.config();  
-connectDB();   
+dotenv.config();
+connectDB();
 
 const app = express();
 app.use(express.json());
 
-// ❗ Register errorHandler at last
-
 const port = process.env.PORT || 5000;
 
-app.use('/users', userRoutes);
+app.use("/users", userRoutes);
 app.use(errorHandler);
 
-
 // app.post('/register', async (req, res) => {
-    
+
 //     try{
 
 //     const {firstName, lastName, email, age, address, phone, password} = req.body;
@@ -33,7 +29,7 @@ app.use(errorHandler);
 
 //     const user = await User.create({
 //         firstName, lastName, age, address, email, phone, password});
-        
+
 //         await user.save();
 //         console.log(user);
 
@@ -44,5 +40,4 @@ app.use(errorHandler);
 // }
 // })
 
-
-app.listen(port, () => console.log(`Server listening on port ${port}!`))
+app.listen(port, () => console.log(`Server listening on port ${port}!`));
