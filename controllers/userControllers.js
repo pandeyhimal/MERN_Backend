@@ -7,7 +7,7 @@ const registration = async (req, res, next) => {
   try {
     const { firstName, lastName, email, age, address, phone, password } =
       req.body;
-    console.log(req.body);
+    
     if (
       !firstName ||
       !lastName ||
