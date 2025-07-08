@@ -12,7 +12,10 @@ app.use(express.json());
 
 const port = process.env.PORT || 5000;
 
-app.use("/users", userRoutes);
+
+// app.use("/users", userRoutes);
+app.use("/", userRoutes);
+app.use("/uploads", express.static("uploads"));
 app.use(errorHandler);
 
 // app.post('/register', async (req, res) => {
