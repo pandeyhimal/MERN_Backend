@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    userId: {
+        userId: {
       type: String,
       unique: true,
       sparse: true,
@@ -41,13 +41,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
       required: true,
-      match: [/^\d{10}$/, 'Phone number must be exactly 10 digits'],
+      match: [/^\d{10}$/, "Phone number must be exactly 10 digits"],
     },
     password: {
       type: String,
       required: true,
       minlength: 6,
     },
+    role: {
+      type: String,
+      enum: ["user", "admin", "moderator"],
+      default: "user",
+    },
+    profileImage: { type: String }, 
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt
