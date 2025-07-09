@@ -7,8 +7,66 @@ const checkRole = require("../middlewares/checkRole")
 const upload = require("../middlewares/uploadMiddleware");
 
 
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User management and admin access
+ */
+
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: User login
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ */
+
 // public  routes
 router.post("/login", login);                       // http://localhost:5000/login
+
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: Register a new user with profile image
+ *     tags: [Users]
+ *     consumes:
+ *       - multipart/form-data
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               profileImage:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ */
 router.post('/register', upload.single("profileImage"), registration );            // http://localhost:5000/register
 
 // Or to update profile image

@@ -4,6 +4,7 @@ const connectDB = require("./dbconfig/dbconnectivity");
 const userRoutes = require("./routes/userRoutes");
 const errorHandler = require("./middlewares/errorHandler");
 const morgan = require('morgan');
+const { swaggerUi, specs } = require("./swagger"); 
 
 dotenv.config();
 connectDB();
@@ -15,6 +16,10 @@ const port = process.env.PORT || 5000;
 
 // Setup logger
 app.use(morgan("dev")); // logs method, URL, status, response time
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs)); // <-- swagger UI
+    // http://localhost:5000/api-docs
+
 
 // app.use("/users", userRoutes);
 app.use("/", userRoutes);
