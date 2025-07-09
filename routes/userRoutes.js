@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {registration, updateUserProfileImage,  updateUserRole, getAllUsers, getUserById, updateUser, deleteUser} = require('../controllers/userControllers');
+const {registration, updateUserProfileImage,  updateUserRole, getAllUsers, getUserById, updateUser, deleteUser, getDeletedUsers, restoreUser} = require('../controllers/userControllers');
 const { login}= require('../controllers/authController');
 const authenticateToken = require('../middlewares/authMiddleware');
 const checkRole = require("../middlewares/checkRole")
@@ -18,6 +18,8 @@ router.put("/updateuserimage/:id", upload.single("profileImage"), updateUserProf
 router.get('/getallusers', authenticateToken,checkRole(['admin']), getAllUsers);            // http://localhost:5000/users/getallusers
 router.put('/updateuserrole/:id', authenticateToken, checkRole(['admin']), updateUserRole);
 router.delete('/deleteuser/:id',authenticateToken, checkRole(['admin']), deleteUser);       // http://localhost:5000/users/deleteuser/id
+router.get('/deleted-users', authenticateToken, checkRole('admin'), getDeletedUsers);       // http://localhost:5000/deleted-users
+router.put('/restoreUsers/:id', authenticateToken, checkRole('admin'), restoreUser);             // http://localhost:5000/restoreUsers/id
 
 
 router.get('/getuserbyid/:id', authenticateToken, getUserById);        // http://localhost:5000/users/getuserbyid/id
