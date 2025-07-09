@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./dbconfig/dbconnectivity");
 const userRoutes = require("./routes/userRoutes");
 const errorHandler = require("./middlewares/errorHandler");
+const morgan = require('morgan');
 
 dotenv.config();
 connectDB();
@@ -12,6 +13,8 @@ app.use(express.json());
 
 const port = process.env.PORT || 5000;
 
+// Setup logger
+app.use(morgan("dev")); // logs method, URL, status, response time
 
 // app.use("/users", userRoutes);
 app.use("/", userRoutes);
