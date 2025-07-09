@@ -2,12 +2,14 @@ const User = require("../models/userModels");
 const getNextSequence = require("../utils/autoIncrement");
 const createCustomError = require("../utils/errorHelper");
 const hashPassword = require("../utils/hashPassword");
+const sendEmail = require("../utils/mailHelper");
+const logEvent = require('../utils/logger');
 
 const registration = async (req, res, next) => {
   try {
     const { firstName, lastName, email, age, address, phone, password } =
       req.body;
-    
+
     if (
       !firstName ||
       !lastName ||
@@ -29,7 +31,7 @@ const registration = async (req, res, next) => {
     }
 
     // Save image path (relative or absolute) in DB
-    const profileImagePath =`/uploads/${req.file.filename}`;
+    const profileImagePath = `/uploads/${req.file.filename}`;
 
     // Check for duplicate email or phone
     const existingUser = await User.findOne({
@@ -49,7 +51,7 @@ const registration = async (req, res, next) => {
     const user = await User.create({
       firstName,
       lastName,
-      age :Number(age),
+      age: Number(age),
       address,
       email,
       phone,
@@ -58,9 +60,24 @@ const registration = async (req, res, next) => {
       customId,
       profileImage: profileImagePath,
     });
-    console.log(user);
+
+    // Try sending email
+    try {
+      await sendEmail(
+        email,
+        "🎉 Welcome to STC!",
+        `Hello ${firstName},\n\nThank you for registering at STC platform.\nWe're glad to have you onboard!`
+      );
+    } catch (emailErr) {
+      console.error("❌ Failed to send email:", emailErr.message);
+      // Optional: log to DB or file for later retry
+    }
+
+    // console.log(user);
+     logEvent(`User registered: ${email}`);  // Log successful registration
     res.status(201).json({ message: "User created successfully", user });
   } catch (error) {
+    logEvent(`Registration failed: ${error.message}`);  // Log error details
     console.error("Error inserting user:", error.message);
     //   res.status(500).json({ message: "Failed to insert user", error });
 
@@ -72,7 +89,7 @@ const registration = async (req, res, next) => {
   }
 };
 
-const updateUserProfileImage = async (req, res,next) => {
+const updateUserProfileImage = async (req, res, next) => {
   try {
     const userId = req.params.id;
 
@@ -87,7 +104,9 @@ const updateUserProfileImage = async (req, res,next) => {
     }
 
     if (!req.file) {
-      return res.status(400).json({ message: "Profile image file is required" });
+      return res
+        .status(400)
+        .json({ message: "Profile image file is required" });
     }
 
     // Optional: Delete old profile image file if exists
@@ -103,7 +122,12 @@ const updateUserProfileImage = async (req, res,next) => {
 
     await user.save();
 
-    res.status(200).json({ message: "Profile image updated successfully", profileImage: user.profileImage });
+    res
+      .status(200)
+      .json({
+        message: "Profile image updated successfully",
+        profileImage: user.profileImage,
+      });
   } catch (error) {
     console.error("Error updating profile image:", error);
     next(createCustomError("Server error", 500));
@@ -160,7 +184,9 @@ const getAllUsers = async (req, res, next) => {
     const order = req.query.order === "asc" ? 1 : -1;
 
     // Build filter object dynamically based on query params
-    const filter = {};
+    const filter = {
+        isDeleted: false  // default: only show active users
+    };
 
     if (req.query.role) {
       filter.role = req.query.role;
@@ -238,18 +264,55 @@ const updateUser = async (req, res, next) => {
 const deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const user = await User.findOneAndDelete({ userId: id });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    
+    // Find user by userId and update isDeleted
+    const user = await User.findOneAndUpdate({ userId: id }, { isDeleted: true, deletedAt: new Date(),}, { new: true});
+    if (!user || user.isDeleted===true) {
+      return res.status(404).json({ message: "User not found or already deleted:" });
     }
-    res.status(200).json({ message: "User deleted successfully", user });
+    res.status(200).json({ message: "User soft-deleted successfully", user });
   } catch (error) {
-    console.error("Error deleting user:", error.message);
-    // res.status(500).json({ message: "Failed to delete user", error });
+    console.error("Error soft deleting user:", error.message);
 
-    next(createCustomError("Failed to delete user", 500));
+    next(createCustomError("Failed to soft delete user", 500));
   }
 };
+
+const getDeletedUsers = async (req, res, next) => {
+  try {
+    const deletedUsers = await User.find({ isDeleted: true });
+
+    res.status(200).json({
+      message: "Soft-deleted users fetched successfully",
+      users: deletedUsers,
+    });
+  } catch (error) {
+    console.error("Error fetching deleted users:", error.message);
+    next(createCustomError("Failed to fetch deleted users", 500));
+  }
+};
+
+const restoreUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+        console.log(id);
+
+    const user = await User.findOneAndUpdate(
+      { userId: id, isDeleted: true },
+      { isDeleted: false, deletedAt: null },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ message: "User not found or not deleted" });
+
+    res.status(200).json({ message: "User restored successfully", user });
+  } catch (error) {
+    console.error("Error restoring user:", error.message);
+    next(createCustomError("Failed to restore user", 500));
+  }
+};
+
+
 
 module.exports = {
   registration,
@@ -259,4 +322,6 @@ module.exports = {
   getUserById,
   updateUser,
   deleteUser,
+  getDeletedUsers,
+  restoreUser,
 };
