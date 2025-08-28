@@ -204,5 +204,13 @@
     npm start
    
 
+## Author
 
+**Himal Pandey**
+
+**Portfolio:** himalpandey.vercel.app
+
+**GitHub:** github.com/pandeyhimal
+
+**LinkedIn:** https://www.linkedin.com/in/himal-pandey-297988225/
 
